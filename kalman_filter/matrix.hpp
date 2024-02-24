@@ -22,7 +22,7 @@
 namespace kf {
 
 template <size_t Row, size_t Col>
-using Matrix = Eigen::Matrix<float, Row, Col>;
+using Matrix = Eigen::Matrix<double, Row, Col>;
 
 /**
  * @brief Template type for vectors

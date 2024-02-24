@@ -7,21 +7,21 @@
 struct VehicleLocationMeasurement : kf::Vector<2> {
   KF_VECTOR(VehicleLocationMeasurement, 2)
   enum { POS_X, POS_Y };
-  float x() const { return (*this)[POS_X]; };
-  float y() const { return (*this)[POS_Y]; };
-  float& x() { return (*this)[POS_X]; };
-  float& y() { return (*this)[POS_Y]; };
+  double x() const { return (*this)[POS_X]; };
+  double y() const { return (*this)[POS_Y]; };
+  double& x() { return (*this)[POS_X]; };
+  double& y() { return (*this)[POS_Y]; };
 };
 
 struct VehicleLocationState : kf::Vector<6> {
   KF_VECTOR(VehicleLocationState, 6)
   enum { POS_X, VEL_X, ACC_X, POS_Y, VEL_Y, ACC_Y };
-  float x() const { return (*this)[POS_X]; };
-  float vx() const { return (*this)[VEL_X]; };
-  float ax() const { return (*this)[ACC_X]; };
-  float y() const { return (*this)[POS_Y]; };
-  float vy() const { return (*this)[VEL_Y]; };
-  float ay() const { return (*this)[ACC_Y]; };
+  double x() const { return (*this)[POS_X]; };
+  double vx() const { return (*this)[VEL_X]; };
+  double ax() const { return (*this)[ACC_X]; };
+  double y() const { return (*this)[POS_Y]; };
+  double vy() const { return (*this)[VEL_Y]; };
+  double ay() const { return (*this)[ACC_Y]; };
   friend std::ostream& operator<<(std::ostream& os,
                                   const VehicleLocationState& s) {
     return os << "x:" << s.x() << ", "
@@ -41,7 +41,7 @@ struct VehicleLocationMeasurementModel
   using Base =
       kf::MeasurementModel<VehicleLocationState, VehicleLocationMeasurement>;
   VehicleLocationMeasurementModel() : Base{} {}
-  void Init(float sigma_x, float sigma_y) {
+  void Init(double sigma_x, double sigma_y) {
     H_.setZero();
     H_(M::POS_X, S::POS_X) = 1;
     H_(M::POS_Y, S::POS_Y) = 1;
@@ -55,8 +55,8 @@ class VehicleLocationSystemModel
     : public kf::SystemModel<VehicleLocationState> {
  public:
   using S = VehicleLocationState;
-  explicit VehicleLocationSystemModel(float acc_var) : acc_var_{acc_var} {}
-  void UpdateProcess(float dt) {
+  explicit VehicleLocationSystemModel(double acc_var) : acc_var_{acc_var} {}
+  void UpdateProcess(double dt) {
     F_.setIdentity();
     F_(S::POS_X, S::VEL_X) = dt;
     F_(S::POS_X, S::ACC_X) = 0.5 * dt * dt;
@@ -75,12 +75,12 @@ class VehicleLocationSystemModel
   }
 
  private:
-  float acc_var_;
+  double acc_var_;
 };
 
 struct VehicleLocationKalmanFilter
     : kf::KalmanFilter<VehicleLocationSystemModel> {
-  void Init(const VehicleLocationState& initialState, float initialNoisy) {
+  void Init(const VehicleLocationState& initialState, double initialNoisy) {
     X_ = initialState;
     P_.setIdentity();
     P_ *= initialNoisy;
@@ -94,7 +94,7 @@ int main() {
   };
   VehicleLocationMeasurementModel measurement_model;
   // The measurement error standard deviation: σx = σy = 3m
-  measurement_model.Init(3.f, 3.f);
+  measurement_model.Init(3.0f, 3.0f);
   VehicleLocationKalmanFilter filter;
   // simulate test measurements
   std::queue<VehicleLocationMeasurement> measurements;
@@ -103,12 +103,14 @@ int main() {
        299.2,  298.62, 301.84, 299.6,  295.3,  299.3,  301.95, 296.3,  295.11,
        295.12, 289.9,  283.51, 276.42, 264.22, 250.25, 236.66, 217.47, 199.75,
        179.7,  160,    140.92, 113.53, 93.68,  69.71,  45.93,  20.87}};
+
   std::vector<double> input_y{
       {-401.46, -375.44, -346.15, -320.2,  -300.08, -274.12, -253.45,
        -226.4,  -200.65, -171.62, -152.11, -125.19, -93.4,   -74.79,
        -49.12,  -28.73,  2.99,    25.65,   49.86,   72.87,   96.34,
        120.4,   144.69,  168.06,  184.99,  205.11,  221.82,  238.3,
        253.02,  267.19,  270.71,  285.86,  288.48,  292.9,   298.77}};
+
 //   measurements.reserve(input_x.size());
   for (int i = 0; i < input_x.size(); ++i) {
     VehicleLocationMeasurement m;
@@ -127,6 +129,12 @@ int main() {
     filter.Predict(system_model);
     // estimate N+1 with both measure & prediction
     auto state = filter.Update(measurement_model, measure);
-    std::cout << state << std::endl;
+    // std::cout << state << std::endl;
+    std::cout << measure.x() << "," << measure.y() << ","
+              << state.x() << "," << state.y() << ","
+              << state.vx() << "," << state.vy() << std::endl;
   }
+
+  
+  return 0;
 }
