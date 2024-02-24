@@ -79,8 +79,7 @@ class VehicleLocationSystemModel
 };
 
 struct VehicleLocationKalmanFilter
-    : kf::KalmanFilter<VehicleLocationSystemModel,
-                       VehicleLocationMeasurementModel> {
+    : kf::KalmanFilter<VehicleLocationSystemModel> {
   void Init(const VehicleLocationState& initialState, float initialNoisy) {
     X_ = initialState;
     P_.setIdentity();

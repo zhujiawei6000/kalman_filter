@@ -6,7 +6,7 @@
 #include "system_model.hpp"
 
 namespace kf {
-template <typename SystemModel, typename MeasurementModel>
+template <typename SystemModel>
 class KalmanFilter {
  public:
   using State = typename SystemModel::StateType;
@@ -18,7 +18,7 @@ class KalmanFilter {
   template <typename MeasurementModel>
   const State& Update(const MeasurementModel& m,
                       const typename MeasurementModel::MeasurementType& z) {
-    using Measurement = MeasurementModel::MeasurementType;
+    using Measurement = typename MeasurementModel::MeasurementType;
     Covariance<Measurement> innovation_cov =
         m.H() * P_ * m.H().transpose() + m.R();
     KalmanGain<State, Measurement> K =
