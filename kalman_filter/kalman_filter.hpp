@@ -15,6 +15,12 @@ class KalmanFilter {
     P_ = sys.F() * P_ * sys.F().transpose() + sys.Q();
     return GetState();
   }
+  template <typename Control>
+  const State& Predict(const SystemModel& sys, const Control& u) {
+    X_ = sys.F() * X_ + sys.G() * u;
+    P_ = sys.F() * P_ * sys.F().transpose() + sys.Q();
+    return GetState();
+  }
   template <typename MeasurementModel>
   const State& Update(const MeasurementModel& m,
                       const typename MeasurementModel::MeasurementType& z) {
