@@ -56,7 +56,7 @@ class VehicleLocationSystemModel
  public:
   using S = VehicleLocationState;
   explicit VehicleLocationSystemModel(double acc_var) : acc_var_{acc_var} {}
-  void UpdateProcess(double dt) {
+  void Update(double dt) {
     F_.setIdentity();
     F_(S::POS_X, S::VEL_X) = dt;
     F_(S::POS_X, S::ACC_X) = 0.5 * dt * dt;
@@ -124,7 +124,7 @@ int main() {
     auto measure = measurements.front();
     measurements.pop();
     // update system model with dt=1.0s
-    system_model.UpdateProcess(1.0f);
+    system_model.Update(1.0f);
     // predict N+1 condition on N
     filter.Predict(system_model);
     // estimate N+1 with both measure & prediction
