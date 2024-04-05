@@ -10,11 +10,9 @@ namespace kf {
 template <typename State, typename Measurement>
 struct MeasurementModel {
   using MeasurementType = Measurement;
-  Observation<Measurement, State> H() const { return H_; }
-  Covariance<Measurement> R() const { return R_; }
+  virtual Measurement h(const State& s) const = 0;
+  virtual Observation<Measurement, State> H() const = 0;
+  virtual Covariance<Measurement> R() const = 0;
 
- protected:
-  Observation<Measurement, State> H_;
-  Covariance<Measurement> R_;
 };
 }  // namespace kf

@@ -3,22 +3,19 @@
 #include <Eigen/Dense>
 #include "types.hpp"
 namespace kf {
+using NoControl = Vector<0>;
 
-template <typename State, typename Control = Vector<0>>
-struct SystemModel {
+template <typename State, typename Control = NoControl>
+struct SystemModelBase {
   using StateType = State;
   using ControlType = Control;
-  const auto& F() const { return F_; }
-  const auto& Q() const { return Q_; }
-  const auto& G() const { return G_; }
+  static constexpr bool kHasControl = !std::is_same_v<Control, NoControl>;
+  virtual State f(const State& s, const Control& u) const = 0;
+  virtual Transition<State> F() const = 0;
+  virtual Covariance<State> Q() const = 0;
 
- protected:
-  Transition<State> F_;
-  Covariance<State> Q_;
-  InputTransition<State, Control> G_;
 };
-template <typename SystemModel>
-inline constexpr bool HasControl =
-    std::is_same<SystemModel::ControlType, Vector<0>>::value;
+
+using NoneControl = void;
 
 }  // namespace kf
