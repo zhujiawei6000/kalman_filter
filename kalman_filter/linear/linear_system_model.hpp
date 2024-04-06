@@ -16,6 +16,10 @@ struct LinearSystemModel : SystemModelBase<State, Control> {
       return F() * s;
     }
   };
+
+  virtual kf::InputTransition<State, Control> G() const {
+    return kf::InputTransition<State, Control>{};
+  };
 };
 
 }  // namespace kf
