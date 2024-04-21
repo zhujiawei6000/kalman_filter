@@ -21,7 +21,7 @@ class ExtendKalmanFilter {
   
   const State& Predict(const SystemModel& sys, const Control& u = Control::Zero()) {
     if constexpr (std::is_base_of_v<LinearizedSystemModel<State>, SystemModel>) {
-      sys.UpdateJacobian(X_);
+      const_cast<SystemModel&>(sys).UpdateJacobian(X_);
     }
     X_ = sys.f(X_, u);
     const auto& F = sys.F();

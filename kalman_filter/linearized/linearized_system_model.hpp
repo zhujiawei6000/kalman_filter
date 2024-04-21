@@ -1,14 +1,24 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include "types.hpp"
+
 #include "system_model.hpp"
+#include "types.hpp"
+
 namespace kf {
 
 template <typename State>
-struct LinearizedSystemModel : SystemModelBase<State> {
+class LinearizedSystemModel : public SystemModelBase<State> {
+ public:
   using SystemModelBase<State>::StateType;
-  virtual void UpdateJacobian(const State& s) = 0;
+
+  void UpdateJacobian(const State& s) { UpdateJacobianImpl(jacobian_, s); }
+  Transition<State> F() const override { return jacobian_; }
+
+ protected:
+  virtual void UpdateJacobianImpl(Transition<State>& jacobian,
+                                  const State& s) = 0;
+  Transition<State> jacobian_;
 };
 
 }  // namespace kf

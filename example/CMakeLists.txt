@@ -4,3 +4,4 @@ add_subdirectory(vehicle_location)
 add_subdirectory(rocket_altitude)
 
 add_subdirectory(vehicle_location_with_radar)
+add_subdirectory(pendulum_angle)
