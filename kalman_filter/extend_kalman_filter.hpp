@@ -33,10 +33,10 @@ class ExtendKalmanFilter {
   const State& Update(const MeasurementModel& m,
                       const typename MeasurementModel::MeasurementType& z) {
     using Measurement = typename MeasurementModel::MeasurementType;
-    if constexpr (std::is_base_of<LinearizedMeasurementModel<State, MeasurementModel::MeasurementType>, MeasurementModel>::value) {
+    if constexpr (std::is_base_of<LinearizedMeasurementModel<State, typename MeasurementModel::MeasurementType>, MeasurementModel>::value) {
       const_cast<MeasurementModel&>(m).UpdateJacobian(X_);
     }
-    auto& H = m.H();
+    const auto& H = m.H();
     Covariance<Measurement> innovation_cov =
         H * P_ * H.transpose() + m.R();
     KalmanGain<State, Measurement> K =

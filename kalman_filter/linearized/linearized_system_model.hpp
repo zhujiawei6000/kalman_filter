@@ -2,8 +2,8 @@
 
 #include <Eigen/Dense>
 
-#include "system_model.hpp"
-#include "types.hpp"
+#include <kalman_filter/system_model.hpp>
+#include <kalman_filter/types.hpp>
 
 namespace kf {
 

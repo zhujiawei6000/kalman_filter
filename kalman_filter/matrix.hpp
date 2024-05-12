@@ -20,9 +20,10 @@
   }
 
 namespace kf {
-
+  
+using FloatType = double;
 template <size_t Row, size_t Col>
-using Matrix = Eigen::Matrix<double, Row, Col>;
+using Matrix = Eigen::Matrix<FloatType, Row, Col>;
 
 /**
  * @brief Template type for vectors

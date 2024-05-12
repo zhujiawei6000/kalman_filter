@@ -8,7 +8,8 @@ namespace kf {
 
 template <typename State, typename Control = NoControl>
 struct LinearSystemModel : SystemModelBase<State, Control> {
-
+  using SystemModelBase<State, Control>::kHasControl;
+  using SystemModelBase<State, Control>::F;
   State f(const State& s, const Control& u) const final {
     if constexpr (kHasControl) {
       return F() * s + G() * u;
