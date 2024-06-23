@@ -11,6 +11,8 @@ using KalmanGain = Matrix<State::RowsAtCompileTime, Measurement::RowsAtCompileTi
 template <typename V>
 using Covariance = Matrix<V::RowsAtCompileTime, V::RowsAtCompileTime>;
 template <typename A, typename B>
+using CrossCovariance = Matrix<A::RowsAtCompileTime, B::RowsAtCompileTime>;
+template <typename A, typename B>
 using Observation = Matrix<A::RowsAtCompileTime, B::RowsAtCompileTime>;
 template <typename V>
 using Transition = Matrix<V::RowsAtCompileTime, V::RowsAtCompileTime>;

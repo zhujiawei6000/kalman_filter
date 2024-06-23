@@ -9,6 +9,7 @@ template <typename State, typename Control = NoControl>
 struct SystemModelBase {
   using StateType = State;
   using ControlType = Control;
+  static constexpr size_t kStateNum = State::RowsAtCompileTime;
   static constexpr bool kHasControl = !std::is_same_v<Control, NoControl>;
   virtual State f(const State& s, const Control& u) const = 0;
   virtual Transition<State> F() const = 0;

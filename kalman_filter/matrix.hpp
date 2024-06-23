@@ -24,7 +24,8 @@ namespace kf {
 using FloatType = double;
 template <size_t Row, size_t Col>
 using Matrix = Eigen::Matrix<FloatType, Row, Col>;
-
+template <size_t N>
+using DiagonalMatrix = Eigen::DiagonalMatrix<FloatType, N>;
 /**
  * @brief Template type for vectors
  * @param T The numeric scalar type

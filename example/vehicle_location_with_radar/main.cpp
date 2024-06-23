@@ -2,12 +2,14 @@
 #include <queue>
 
 #include "kalman_filter/extend_kalman_filter.hpp"
+#include "kalman_filter/unscented_kalman_filter.hpp"
 #include "radar_measurement_model.hpp"
 #include "vehicle_location_system_model.hpp"
 #include <iostream>
+// using VehicleLocationFilter =
+//     kf::ExtendKalmanFilter<VehicleLocationSystemModel>;
 using VehicleLocationFilter =
-    kf::ExtendKalmanFilter<VehicleLocationSystemModel>;
-
+    kf::UnscentedKalmanFilter<VehicleLocationSystemModel>;
 std::queue<RadarMeasurement> GenerateInputs() {
   std::queue<RadarMeasurement> inputs;
 
