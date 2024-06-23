@@ -15,7 +15,8 @@ class UnscentedKalmanFilter {
   using StateCov = Covariance<State>;
   static constexpr auto kNumSigmaPoints = 2 * SystemModel::kStateNum + 1;
   static constexpr auto kStateNum = SystemModel::kStateNum;
-  using SigmaPointsMatrix = Matrix<kStateNum, kNumSigmaPoints>;
+  template<class Type>
+  using SigmaPoints = Matrix<Type::RowsAtCompileTime, kNumSigmaPoints>;
 
   void Init(State x, Covariance<State> p) {
     X_ = std::move(x);
@@ -37,24 +38,24 @@ class UnscentedKalmanFilter {
     // cholesky decomposition
     factor = factor.llt().matrixL();
     // calculate state sigma points
-    std::array<State, kNumSigmaPoints> sigma_points;
-    sigma_points[0] = X_;
+    SigmaPoints<State> sigma_points;
+    sigma_points.col(0) = X_;
     for (int i = 0; i < kStateNum; ++i) {
-      sigma_points[1 + i] = X_ + factor.col(i);
+      sigma_points.col(1 + i) = X_ + factor.col(i);
     }
     for (int i = 0; i < kStateNum; ++i) {
-      sigma_points[1 + kStateNum + i] = (X_ - factor.col(i));
+      sigma_points.col(1 + kStateNum + i) = (X_ - factor.col(i));
     }
 
     // transfer to the next state
-    std::transform(sigma_points.begin(), sigma_points.end(),
-                   state_sigma_points_.begin(),
-                   [&sys, &u](const State& state) { return sys.f(state, u); });
-    state_sigma_matrix_ = HStack(state_sigma_points_);
+    for(int i = 0; i < kNumSigmaPoints; ++i) {
+      state_sigma_points_.col(i) = sys.f(sigma_points.col(i), u);
+    }
+
     // caculate mean and variance after transition
-    X_ = state_sigma_matrix_ * sigma_point_weights_;
-    P_ = (state_sigma_matrix_.colwise() - X_) * sigma_point_weights_.asDiagonal() *
-             (state_sigma_matrix_.colwise() - X_).transpose() +
+    X_ = state_sigma_points_ * sigma_point_weights_;
+    P_ = (state_sigma_points_.colwise() - X_) * sigma_point_weights_.asDiagonal() *
+             (state_sigma_points_.colwise() - X_).transpose() +
          sys.Q();
     return GetState();
   }
@@ -64,21 +65,21 @@ class UnscentedKalmanFilter {
                       const typename MeasurementModel::MeasurementType& z) {
     // sigma points convert from state space to measurement
     using Measurement = typename MeasurementModel::MeasurementType;
-    std::array<Measurement, kNumSigmaPoints> sigma_points;
-    std::transform(state_sigma_points_.begin(), state_sigma_points_.end(),
-                   sigma_points.begin(),
-                   [&m](const State& state) { return m.h(state); });
-    auto sigma_matrix = HStack(sigma_points);
+    SigmaPoints<Measurement> sigma_points;
+    for(int i = 0; i < kNumSigmaPoints; ++i) {
+      sigma_points.col(i) = m.h(state_sigma_points_.col(i));
+    }
+    
     // compute the mean
-    Measurement mean = sigma_matrix * sigma_point_weights_;
+    Measurement mean = sigma_points * sigma_point_weights_;
     // compute the variance
-    Covariance<Measurement> cov = (sigma_matrix.colwise() - mean) *
+    Covariance<Measurement> cov = (sigma_points.colwise() - mean) *
                                       sigma_point_weights_.asDiagonal() *
-                                      (sigma_matrix.colwise() - mean).transpose() +
+                                      (sigma_points.colwise() - mean).transpose() +
                                   m.R();
     CrossCovariance<State, Measurement> cross_cov =
-        (state_sigma_matrix_.colwise() - X_) * sigma_point_weights_.asDiagonal() *
-        (sigma_matrix.colwise() - mean).transpose();
+        (state_sigma_points_.colwise() - X_) * sigma_point_weights_.asDiagonal() *
+        (sigma_points.colwise() - mean).transpose();
 
     // compute the kalman gain
     KalmanGain<State, Measurement> kalman_gain = cross_cov * cov.inverse();
@@ -93,8 +94,7 @@ class UnscentedKalmanFilter {
  protected:
   State X_;
   StateCov P_;
-  std::array<State, kNumSigmaPoints> state_sigma_points_;
-  Matrix<kStateNum, kNumSigmaPoints> state_sigma_matrix_;
+  SigmaPoints<State> state_sigma_points_;
   int kappa_;
   Vector<kNumSigmaPoints> sigma_point_weights_;
 };
