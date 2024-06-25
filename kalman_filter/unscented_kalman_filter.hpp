@@ -21,7 +21,7 @@ class UnscentedKalmanFilter {
   void Init(State x, Covariance<State> p) {
     X_ = std::move(x);
     P_ = std::move(p);
-    kappa_ = 3 - kStateNum;
+    kappa_ = static_cast<int>(3 - kStateNum);
     float w0 = static_cast<float>(kappa_) / (kStateNum + kappa_);
     float w1 = 1.0f / (2.0f * (kStateNum + kappa_));
 
